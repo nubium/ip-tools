@@ -3,17 +3,21 @@ declare(strict_types=1);
 
 namespace Nubium\IpTools;
 
+use GeoIp2\Database\Reader;
+
 /**
  * Service pro praci s geo IP.
  */
 class GeoIP
 {
 	private string $myIp;
+	private Reader $reader;
 
 
-	public function __construct(?string $myIp)
+	public function __construct(?string $myIp, string $maxmindDbPath = '/usr/share/GeoIP/GeoIP2-Country.mmdb')
 	{
-		$this->myIp = (string)$myIp;
+		$this->myIp = (string) $myIp;
+		$this->reader = new Reader($maxmindDbPath);
 	}
 
 
@@ -36,19 +40,18 @@ class GeoIP
 			return 'local';
 		}
 
-		$countryName = $this->fetchCountryName($ip);
+		$countryName = $this->fetchCountryCode($ip);
 		return $countryName ? strtolower($countryName) : 'unknown';
 	}
 
 
-	public function getASN(): ?string
+	public function getASN(): ?int
 	{
-		return (@geoip_asnum_by_name($this->myIp)) ?: null;
+		return $this->reader->asn($this->myIp)->autonomousSystemNumber;
 	}
 
-
-	protected function fetchCountryName(string $ip): ?string
+	protected function fetchCountryCode(string $ip): ?string
 	{
-		return (@geoip_country_code_by_name($ip)) ?: null;
+		return $this->reader->country($ip)->country->isoCode;
 	}
 }

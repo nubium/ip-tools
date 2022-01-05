@@ -41,7 +41,7 @@ class IpList
 
 	public function contains(string $ip): bool
 	{
-		$ip = ip2long((string)$ip);
+		$ip = ip2long($ip);
 		if (!$ip) {
 			return false;
 		}

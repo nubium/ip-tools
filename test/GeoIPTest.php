@@ -13,11 +13,11 @@ class GeoIPTest extends TestCase
 	 */
 	public function testLocalIpMatchesLocalRange(string $ip): void
 	{
-		$geoIp = \Mockery::mock(GeoIP::class, [$ip]);
-		$geoIp
+		$geoIp = \Mockery::mock(GeoIP::class, [$ip, './test/GeoIP2-Country-Test.mmdb'])
 			->makePartial()
-			->shouldAllowMockingProtectedMethods()
-			->shouldReceive('fetchCountryName')->never()->getMock();
+			->shouldAllowMockingProtectedMethods();
+
+		$geoIp->shouldReceive('fetchCountryCode')->never()->getMock();
 
 		$this->assertSame('local', $geoIp->getCountryCode());
 	}
@@ -44,13 +44,13 @@ class GeoIPTest extends TestCase
 	 */
 	public function testCountryIpsMatchWithGeoipExtension(string $ip): void
 	{
-		$geoIp = \Mockery::mock(GeoIP::class, [$ip]);
-		$geoIp
+		$geoIp = \Mockery::mock(GeoIP::class, [$ip, './test/GeoIP2-Country-Test.mmdb'])
 			->makePartial()
-			->shouldAllowMockingProtectedMethods()
-			->shouldReceive('fetchCountryName')->with($ip)->once()->andReturn('turkey')->getMock();
+			->shouldAllowMockingProtectedMethods();
 
-		$this->assertSame('turkey', $geoIp->getCountryCode());
+		$geoIp->shouldReceive('fetchCountryCode')->with($ip)->once()->andReturn('tr')->getMock();
+
+		$this->assertSame('tr', $geoIp->getCountryCode());
 	}
 
 	/**
